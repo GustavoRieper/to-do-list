@@ -327,6 +327,14 @@
                     margin-left: 2%;
                     margin-right: 2%;
                     color: var(--font);
+
+                    >h3{
+                        >svg{
+                            position: relative;
+                            top: 3px;
+                            margin-right: 10px;
+                        }
+                    }
                 }
 
                 >.participants{

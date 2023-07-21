@@ -127,6 +127,7 @@ export const Home = () => {
 
     function activeBlock(){
         setTaskBlock(true);
+        setBtnAddUserTask("d-none");
     }
 
     function desactiveBlock(){
@@ -162,46 +163,46 @@ export const Home = () => {
         const date = new Date().toLocaleString();
 
         const participants = selectedUsers.map((user) => ({
-        email: user.email,
-        name: user.name,
-        photo: user.photo,
+            email: user.email,
+            name: user.name,
+            photo: user.photo,
         }));
 
         const newTask = {
-        title,
-        description,
-        created_by,
-        date_time: date,
-        status: "pending",
-        block: taskBlock,
-        participants,
+            title,
+            description,
+            created_by,
+            date_time: date,
+            status: "pending",
+            block: taskBlock,
+            participants,
         };
 
         try {
-        if (taskId) {
-            await updateDoc(doc(firestore, "tasks", taskId), newTask);
-            console.log("Tarefa atualizada com sucesso.");
-        } else {
-            await addDoc(collection(firestore, "tasks"), newTask);
-            console.log("Tarefa criada com sucesso.");
-        }
+            if (taskId) {
+                await updateDoc(doc(firestore, "tasks", taskId), newTask);
+                console.log("Tarefa atualizada com sucesso.");
+            } else {
+                await addDoc(collection(firestore, "tasks"), newTask);
+                console.log("Tarefa criada com sucesso.");
+            }
 
-        setBtnCreateTask("d-none");
-        setBtnAddUserTask("d-none");
-        setSelectedUsers([]);
-        } catch (error) {
-        console.error("Erro ao criar ou atualizar a task:", error);
+            setBtnCreateTask("d-none");
+            setBtnAddUserTask("d-none");
+            setSelectedUsers([]);
+            } catch (error) {
+            console.error("Erro ao criar ou atualizar a task:", error);
         }
     };
 
     const handleTaskCompletion = async (id) => {
         try {
-        await updateDoc(doc(firestore, "tasks", id), {
-            status: "finalized",
-        });
-        console.log("Tarefa concluída com sucesso.");
-        } catch (error) {
-        console.error("Erro ao concluir a task:", error);
+            await updateDoc(doc(firestore, "tasks", id), {
+                status: "finalized",
+            });
+            console.log("Tarefa concluída com sucesso.");
+            } catch (error) {
+            console.error("Erro ao concluir a task:", error);
         }
     };
 
@@ -222,8 +223,8 @@ export const Home = () => {
         <div className="app">
             <div className="header">
                 <div>
-                <img src={user.photoURL} alt="Foto do usuário" />
-                <h1>{user.displayName}</h1>
+                    <img src={user.photoURL} alt="Foto do usuário" />
+                    <h1>{user.displayName}</h1>
                 </div>
                 <button onClick={signOut}>Sair</button>
             </div>
@@ -240,54 +241,74 @@ export const Home = () => {
 
             <div className="container-app">
                 <button className="add-task" onClick={createCard}>
-                <Plus />
+                    <Plus />
                 </button>
 
                 <div className="box-participants">
-                <div className="participants">
-                    <h2>Participantes</h2>
-                </div>
-
-                <div className="list-participants">
-                    {users.map((user_list) => (
-                    <div className="users-participants" key={user_list.email}>
-                        <div className="area-image">
-                        <img src={user_list.photo} alt={user_list.name} />
-                        </div>
-                        <span>
-                        {user_list.name} {user.email === user_list.email ? `(Você)` : ``}
-                        </span>
+                    <div className="participants">
+                        <h2>Participantes</h2>
                     </div>
-                    ))}
-                </div>
+
+                    <div className="list-participants">
+                        {users.map((user_list) => (
+                        <div className="users-participants" key={user_list.email}>
+                            <div className="area-image">
+                            <img src={user_list.photo} alt={user_list.name} />
+                            </div>
+                            <span>
+                            {user_list.name} {user.email === user_list.email ? `(Você)` : ``}
+                            </span>
+                        </div>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="container-list">
-                <div className="header">
-                    <h2 className={`pending ${activeTab === "pending" ? "active" : ""}`} onClick={() => {clear_filter(); setActiveTab("pending")}}>
-                    Pendentes
-                    </h2>
-                    <h2 className={`finalized ${activeTab === "finalized" ? "active" : ""}`} onClick={() => {clear_filter(); setActiveTab("finalized")}}>
-                    Finalizados
-                    </h2>
-                </div>
+                    <div className="header">
+                        <h2 className={`pending ${activeTab === "pending" ? "active" : ""}`} onClick={() => {clear_filter(); setActiveTab("pending")}}>
+                        Pendentes
+                        </h2>
+                        <h2 className={`finalized ${activeTab === "finalized" ? "active" : ""}`} onClick={() => {clear_filter(); setActiveTab("finalized")}}>
+                        Finalizados
+                        </h2>
+                    </div>
 
-                <div className="content-list">
-                    {activeTab === "pending" ? (
-                    listProjectsPending.map((project) => (
-                        <div
-                        className="card"
-                        key={project.id}
-                        onClick={() => openCard(project.title, project.description, project.id, project.participants, project.created_by, project.block)}
-                        >
-                            {!project.block ? (
-                                <button className="complete-task" onClick={(e) => e.stopPropagation()}>
-                                    <Check  onClick={() => handleTaskCompletion(project.id)} />
-                                </button>
-                            ) : (
-                                <div className="block"><Lock /></div>
-                            )}
-                            
+                    <div className="content-list">
+                        {activeTab === "pending" ? (
+                        listProjectsPending.map((project) => (
+                            <div
+                            className="card"
+                            key={project.id}
+                            onClick={() => openCard(project.title, project.description, project.id, project.participants, project.created_by, project.block)}
+                            >
+                                {!project.block || user.email == project.created_by ? (
+                                    <button className="complete-task" onClick={(e) => e.stopPropagation()}>
+                                        <Check  onClick={() => handleTaskCompletion(project.id)} />
+                                    </button>
+                                ) : (
+                                    <div className="block"><Lock /></div>
+                                )}
+                                
+                                <div className="title">
+                                    <h3>
+                                        {user.email == project.created_by && project.block ? <Lock /> : ""}
+                                        {project.title}
+                                    </h3>
+                                </div>
+                                <div className="participants">
+                                    {project.participants.map((user) => (
+                                    <img key={user.email} src={user.photo} alt={user.name} title={user.name} />
+                                    ))}
+                                </div>
+                            </div>
+                        ))
+                        ) : (
+                        listProjectsFinalized.map((project) => (
+                            <div
+                            className="card finalized"
+                            key={project.id}
+                            onClick={() => openCard(project.title, project.description, project.id, project.participants, project.created_by, project.block)}
+                            >
                             <div className="title">
                                 <h3>{project.title}</h3>
                             </div>
@@ -296,127 +317,110 @@ export const Home = () => {
                                 <img key={user.email} src={user.photo} alt={user.name} title={user.name} />
                                 ))}
                             </div>
-                        </div>
-                    ))
-                    ) : (
-                    listProjectsFinalized.map((project) => (
-                        <div
-                        className="card finalized"
-                        key={project.id}
-                        onClick={() => openCard(project.title, project.description, project.id, project.participants, project.created_by, project.block)}
-                        >
-                        <div className="title">
-                            <h3>{project.title}</h3>
-                        </div>
-                        <div className="participants">
-                            {project.participants.map((user) => (
-                            <img key={user.email} src={user.photo} alt={user.name} title={user.name} />
-                            ))}
-                        </div>
-                        </div>
-                    ))
-                    )}
-
-                    <div className={`view-task ${btnCreateTask === "d-none" ? "d-none" : "d-flex"}`}>
-                    <div className="header">
-                        <input
-                        type="text"
-                        className="titleTask"
-                        placeholder="Informe um título"
-                        disabled={taskBlock && taskBlockCreated !== user.email ? isViewingTask : undefined}
-                        onChange={(e) => setTitleViewTask(e.target.value)}
-                        value={titleViewTask}
-                        />
-                    </div>
-                    <div className="content">
-                        {taskBlockCreated ? (<sub>Criado por: {taskBlockCreated} {user.email == taskBlockCreated ? " (Você)" : "" }</sub>) : ""}
-                        <textarea
-                        className="descriptionTask"
-                        placeholder="Informe uma Descrição"
-                        disabled={taskBlock && taskBlockCreated !== user.email ? isViewingTask : undefined}
-                        onChange={(e) => setDescViewTask(e.target.value)}
-                        value={descViewTask}
-                        ></textarea>
-                    </div>
-                    <div className="footer">
-                        <div className={`container-add ${btnAddUserTask === "d-none" ? "d-none" : "d-flex"}`}>
-                        <h3>Adicionar Participantes</h3>
-                        <div className="list-users">
-                            {users.map((user_list) => (
-                            <img
-                                key={user_list.email}
-                                src={user_list.photo}
-                                alt={user_list.name}
-                                id={user_list.email}
-                                onClick={() => handleAddUser(user_list)}
-                            />
-                            ))}
-                        </div>
-                        </div>
-                        <div className="participants">
-                        {selectedUsers.map((user) => (
-                            <div key={user.email}>
-                            <XCircle title="Remover Usuário" onClick={() => setSelectedUsers(selectedUsers.filter((u) => u.email !== user.email))} />
-                            <img src={user.photo} alt={user.name} />
                             </div>
-                        ))}
-                        {
-                            !taskBlock || taskBlockCreated === user.email ? (
-                                <button className="add-user" title="Adicionar Usuário" onClick={() => setBtnAddUserTask((prev) => (prev === "d-none" ? "d-flex" : "d-none"))}>
-                                    <Plus />
-                                </button>
-                            ) : ("")
-                        }
-                        </div>
-                        <div className="actions">
-                        <button className="cancel" onClick={() => {setBtnCreateTask("d-none"); setSelectedUsers([]);}}>
-                            Cancelar
-                        </button>
-                        {
-                            !isViewingTask ? (
-                                <>
-                                    <button className="block" onClick={activeBlock}>
-                                        Bloquear
-                                    </button>
-                                    <button className="create" onClick={handleCreateTask}>
-                                        Criar
-                                    </button>
-                                </>
-                            ) : !taskBlock || taskBlockCreated === user.email ? (
-                                <>
-                                <button className="remove" onClick={() => handleRemoveTask(taskId)}>
-                                    Remover
-                                </button>
-                                {
-                                    taskBlockCreated === user.email ? (
-                                        taskBlock ? (
-                                            <button className="block" onClick={desactiveBlock}>
-                                                <LockOpen />
-                                                Desbloquear
+                        ))
+                        )}
+
+                        <div className={`view-task ${btnCreateTask === "d-none" ? "d-none" : "d-flex"}`}>
+                            <div className="header">
+                                <input
+                                type="text"
+                                className="titleTask"
+                                placeholder="Informe um título"
+                                disabled={taskBlock && taskBlockCreated !== user.email ? isViewingTask : undefined}
+                                onChange={(e) => setTitleViewTask(e.target.value)}
+                                value={titleViewTask}
+                                />
+                            </div>
+                            <div className="content">
+                                {taskBlockCreated ? (<sub>Criado por: {taskBlockCreated} {user.email == taskBlockCreated ? " (Você)" : "" }</sub>) : ""}
+                                <textarea
+                                className="descriptionTask"
+                                placeholder="Informe uma Descrição"
+                                disabled={taskBlock && taskBlockCreated !== user.email ? isViewingTask : undefined}
+                                onChange={(e) => setDescViewTask(e.target.value)}
+                                value={descViewTask}
+                                ></textarea>
+                            </div>
+                            <div className="footer">
+                                <div className={`container-add ${btnAddUserTask === "d-none" ? "d-none" : "d-flex"}`}>
+                                    <h3>Adicionar Participantes</h3>
+                                    <div className="list-users">
+                                        {users.map((user_list) => (
+                                        <img
+                                            key={user_list.email}
+                                            src={user_list.photo}
+                                            alt={user_list.name}
+                                            id={user_list.email}
+                                            onClick={() => handleAddUser(user_list)}
+                                        />
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="participants">
+                                    {selectedUsers.map((user) => (
+                                        <div key={user.email}>
+                                        <XCircle title="Remover Usuário" onClick={() => setSelectedUsers(selectedUsers.filter((u) => u.email !== user.email))} />
+                                        <img src={user.photo} alt={user.name} />
+                                        </div>
+                                    ))}
+                                    {
+                                        !taskBlock || taskBlockCreated === user.email ? (
+                                            <button className="add-user" title="Adicionar Usuário" onClick={() => setBtnAddUserTask((prev) => (prev === "d-none" ? "d-flex" : "d-none"))}>
+                                                <Plus />
                                             </button>
+                                        ) : ("")
+                                    }
+                                </div>
+                                <div className="actions">
+                                    <button className="cancel" onClick={() => {setBtnCreateTask("d-none"); setSelectedUsers([]);}}>
+                                        Cancelar
+                                    </button>
+                                    {
+                                        !isViewingTask ? (
+                                            <>
+                                                <button className="block" onClick={taskBlock ? desactiveBlock : activeBlock}>
+                                                    {taskBlock ? "Desbloquear" : "Bloquear"}
+                                                </button>
+                                                <button className="create" onClick={handleCreateTask}>
+                                                    Criar
+                                                </button>
+                                            </>
+                                        ) : !taskBlock || taskBlockCreated === user.email ? (
+                                            <>
+                                            <button className="remove" onClick={() => handleRemoveTask(taskId)}>
+                                                Remover
+                                            </button>
+                                            {
+                                                taskBlockCreated === user.email ? (
+                                                    taskBlock ? (
+                                                        <button className="block" onClick={desactiveBlock}>
+                                                            <LockOpen />                                                
+                                                            {taskBlock ? "Desbloquear" : "Bloquear"}
+                                                        </button>
+                                                    ) : (
+                                                        <button className="block" onClick={activeBlock}>
+                                                            <Lock />
+                                                            {taskBlock ? "Bloquear" : "Desbloquear"}
+                                                        </button>
+                                                    )
+                                                    
+                                                ) : (
+                                                    ""
+                                                )
+                                            }
+                                            <button className="create" onClick={handleCreateTask}>
+                                                Salvar
+                                            </button>
+                                            </>
                                         ) : (
-                                            <button className="block" onClick={activeBlock}>
-                                                <Lock />
-                                                Bloquear
-                                            </button>
+                                            ""
                                         )
-                                        
-                                    ) : (
-                                        ""
-                                    )
-                                }
-                                <button className="create" onClick={handleCreateTask}>
-                                    Salvar
-                                </button>
-                                </>
-                            ) : (
-                                ""
-                            )
-                        }
+                                    }
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    </div>
-                </div>
                 </div>
             </div>
         </div>
