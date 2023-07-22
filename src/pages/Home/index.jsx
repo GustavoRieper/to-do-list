@@ -8,6 +8,7 @@ import "../../style/global.scss";
 
 export const Home = () => {
     const { user, signOut, users } = useContext(AuthGoogleContext);
+    const [usersList, setUsersList] = useState([]);
 
     const [activeTab, setActiveTab] = useState("pending");
     const [btnCreateTask, setBtnCreateTask] = useState("d-none");
@@ -55,12 +56,25 @@ export const Home = () => {
             }
         );
 
+        const unsubscribeUsers = listenToUsers();
+
         // Limpar os listeners ao desmontar o componente
         return () => {
             unsubscribePending();
             unsubscribeFinalized();
+            unsubscribeUsers();
         };
     }, []);
+
+    // Atualização dos usuários em tempo real
+    const listenToUsers = () => {
+        const unsubscribeUsers = onSnapshot(collection(firestore, "users"), (snapshot) => {
+          const usersData = snapshot.docs.map((doc) => doc.data());
+          setUsersList(usersData);
+        });
+      
+        return unsubscribeUsers;
+      };
 
     function openCard(title, description, id, participants, emailCreated, block) {
         setTaskBlock(false);
@@ -250,7 +264,7 @@ export const Home = () => {
                     </div>
 
                     <div className="list-participants">
-                        {users.map((user_list) => (
+                        {usersList.map((user_list) => (
                         <div className="users-participants" key={user_list.email}>
                             <div className="area-image">
                             <img src={user_list.photo} alt={user_list.name} />
@@ -360,7 +374,10 @@ export const Home = () => {
                                 <div className="participants">
                                     {selectedUsers.map((user) => (
                                         <div key={user.email}>
-                                        <XCircle title="Remover Usuário" onClick={() => setSelectedUsers(selectedUsers.filter((u) => u.email !== user.email))} />
+                                        <XCircle title="Remover Usuário"
+                                            onClick={() => setSelectedUsers(selectedUsers.filter((u) => u.email !== user.email))}
+                                            className={`${btnAddUserTask === "d-none" || taskBlockCreated === user.email ? "d-none" : "d-flex"}`}
+                                        />
                                         <img src={user.photo} alt={user.name} />
                                         </div>
                                     ))}
@@ -369,7 +386,13 @@ export const Home = () => {
                                             <button className="add-user" title="Adicionar Usuário" onClick={() => setBtnAddUserTask((prev) => (prev === "d-none" ? "d-flex" : "d-none"))}>
                                                 <Plus />
                                             </button>
-                                        ) : ("")
+                                        ) : (
+                                                !isViewingTask ? (
+                                                    <button className="add-user" title="Adicionar Usuário" onClick={() => setBtnAddUserTask((prev) => (prev === "d-none" ? "d-flex" : "d-none"))}>
+                                                        <Plus />
+                                                    </button>
+                                                ) : ""
+                                        )
                                     }
                                 </div>
                                 <div className="actions">
@@ -401,7 +424,7 @@ export const Home = () => {
                                                     ) : (
                                                         <button className="block" onClick={activeBlock}>
                                                             <Lock />
-                                                            {taskBlock ? "Bloquear" : "Desbloquear"}
+                                                            {taskBlock ? "Desbloquear" : "Bloquear"}
                                                         </button>
                                                     )
                                                     
