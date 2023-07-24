@@ -2,13 +2,13 @@
 Este é um projeto de uma aplicação To-Do List desenvolvida como parte do processo de aprendizado e prática em React e Firebase.
 
 # Protótipo
-Você pode visualizar o protótipo da aplicação criado no Figma através do seguinte link: Protótipo To-Do List
+Você pode visualizar o protótipo da aplicação criado no Figma através do seguinte link: [Protótipo To-Do List](https://www.figma.com/file/WWcK8SiYqJp6ppmIB7Q838/to-do-list?type=design&node-id=2%3A66&mode=design&t=PK8NqVpuHkBLPeBb-1)
 
 # Instruções de Instalação e Execução
 Antes de iniciar o projeto, certifique-se de ter o Node.js instalado em sua máquina. Caso não possua, você pode baixá-lo em: <code>Node.js</code>
 
 Clone o repositório para sua máquina local usando o seguinte comando:
-<code>git clone https://github.com/seu-usuario/to-do-list.git</code>
+<code>git clone https://github.com/gustavorieper/to-do-list.git</code>
 
 Navegue até o diretório do projeto:
 <code>cd to-do-list</code>
